@@ -1,0 +1,13 @@
+{
+  "name": "my-portfolio",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently \"npm.cmd run dev --prefix client\" \"npm.cmd run start --prefix server\"",
+    "build": "npm.cmd run build --prefix client",
+    "start": "node server/index.js"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.0"
+  }
+}

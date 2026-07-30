@@ -12,6 +12,15 @@ const projects = [
     link: 'https://github.com/MethodPrince/App-Navigation-Labs.git'
   },
   {
+    title: 'UMPCFERI Website',
+    type: 'WordPress / React / SQL',
+    challenge: 'The university needed a modern full-stack website with content management and dynamic student services.',
+    solution: 'Built a hybrid full-stack solution using WordPress for CMS, React for interactive pages, and SQL for structured data.',
+    impact: 'Delivered a responsive university website with easier content updates, faster information access, and improved user engagement.',
+    stack: ['WordPress', 'React', 'SQL'],
+    link: 'https://github.com/MethodPrince/umpcferi_website.git'
+  },
+  {
     title: 'EduLearning System',
     type: 'React / Node.js',
     challenge: 'Learners needed a centralized space for secure digital coursework and progress tracking.',

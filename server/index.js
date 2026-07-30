@@ -3,18 +3,33 @@ import nodemailer from 'nodemailer';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import fs from 'fs';
-import 'dotenv/config';
+import dotenv from 'dotenv';
+import { resolveEnvPath } from './env.js';
+
+dotenv.config({ path: resolveEnvPath(process.cwd()) });
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const app = express();
 const port = process.env.PORT || 5175;
 
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type,Accept');
+
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(204);
+  }
+
+  return next();
+});
 app.use(express.json());
 const staticDir = path.join(process.cwd(), 'client', 'dist');
 console.log('Static directory:', staticDir);
 console.log('Static directory exists:', fs.existsSync(staticDir));
 console.log('Index file exists:', fs.existsSync(path.join(staticDir, 'index.html')));
+console.log('Loaded env file:', resolveEnvPath(process.cwd()));
 app.use(express.static(staticDir));
 
 const recipientEmail = process.env.CONTACT_RECEIVER_EMAIL || 'princembowana013@gmail.com';

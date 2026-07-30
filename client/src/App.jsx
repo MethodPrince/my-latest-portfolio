@@ -40,6 +40,15 @@ const projects = [
   }
 ];
 
+const getApiUrl = () => {
+  const configuredUrl = import.meta.env.VITE_API_URL?.trim();
+  if (configuredUrl) {
+    return configuredUrl.replace(/\/$/, '');
+  }
+
+  return '/api';
+};
+
 function App() {
   const [form, setForm] = useState({ name: '', email: '', message: '' });
   const [submitState, setSubmitState] = useState({ status: 'idle', message: '' });
@@ -54,7 +63,8 @@ function App() {
     setSubmitState({ status: 'sending', message: 'Sending your message...' });
 
     try {
-      const response = await fetch('/api/contact', {
+      const apiUrl = getApiUrl();
+      const response = await fetch(`${apiUrl}/contact`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

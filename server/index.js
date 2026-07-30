@@ -10,7 +10,8 @@ const app = express();
 const port = process.env.PORT || 5175;
 
 app.use(express.json());
-app.use(express.static(path.join(__dirname, '../client/dist')));
+const staticDir = path.join(process.cwd(), 'client', 'dist');
+app.use(express.static(staticDir));
 
 const recipientEmail = process.env.CONTACT_RECEIVER_EMAIL || 'princembowana013@gmail.com';
 const hasPlaceholderPassword =
@@ -84,7 +85,7 @@ app.post('/api/contact', async (req, res) => {
 });
 
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../client/dist/index.html'));
+  res.sendFile(path.join(staticDir, 'index.html'));
 });
 
 app.listen(port, () => {

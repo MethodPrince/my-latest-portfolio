@@ -2,6 +2,7 @@ import express from 'express';
 import nodemailer from 'nodemailer';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import fs from 'fs';
 import 'dotenv/config';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -11,6 +12,9 @@ const port = process.env.PORT || 5175;
 
 app.use(express.json());
 const staticDir = path.join(process.cwd(), 'client', 'dist');
+console.log('Static directory:', staticDir);
+console.log('Static directory exists:', fs.existsSync(staticDir));
+console.log('Index file exists:', fs.existsSync(path.join(staticDir, 'index.html')));
 app.use(express.static(staticDir));
 
 const recipientEmail = process.env.CONTACT_RECEIVER_EMAIL || 'princembowana013@gmail.com';

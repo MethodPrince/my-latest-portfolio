@@ -49,6 +49,83 @@ const getApiUrl = () => {
   return '/api';
 };
 
+const CONTACT_FORM_NAME = 'portfolio-contact';
+
+const encodeFormBody = (payload) =>
+  Object.entries(payload)
+    .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value)}`)
+    .join('&');
+
+const postWithTimeout = async (url, options, timeoutMs = 8000) => {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    return await fetch(url, { ...options, signal: controller.signal });
+  } finally {
+    clearTimeout(timeoutId);
+  }
+};
+
+const submitWithNetlifyForm = async (form) => {
+  const payload = {
+    'form-name': CONTACT_FORM_NAME,
+    name: form.name,
+    email: form.email,
+    message: form.message,
+    'bot-field': ''
+  };
+
+  const response = await postWithTimeout(
+    '/',
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      body: encodeFormBody(payload)
+    },
+    6000
+  );
+
+  if (!response.ok) {
+    throw new Error('Unable to send your message right now. Please try again.');
+  }
+
+  return { ok: true };
+};
+
+const submitWithApi = async (form) => {
+  const apiUrl = getApiUrl();
+  const response = await postWithTimeout(
+    `${apiUrl}/contact`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json'
+      },
+      body: JSON.stringify(form)
+    },
+    8000
+  );
+
+  const contentType = response.headers.get('content-type') || '';
+  const isJson = contentType.includes('application/json');
+  const result = isJson
+    ? await response.json()
+    : {
+        ok: false,
+        error: 'Contact service is unavailable. Please restart the dev server and try again.'
+      };
+
+  if (!response.ok || !result.ok) {
+    throw new Error(result.error || 'Unable to send your message right now.');
+  }
+
+  return result;
+};
+
 function App() {
   const [form, setForm] = useState({ name: '', email: '', message: '' });
   const [submitState, setSubmitState] = useState({ status: 'idle', message: '' });
@@ -62,37 +139,36 @@ function App() {
     event.preventDefault();
     setSubmitState({ status: 'sending', message: 'Sending your message...' });
 
-    try {
-      const apiUrl = getApiUrl();
-      const response = await fetch(`${apiUrl}/contact`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Accept: 'application/json'
-        },
-        body: JSON.stringify(form)
+    const payload = {
+      name: form.name.trim(),
+      email: form.email.trim(),
+      message: form.message.trim()
+    };
+
+    if (!payload.name || !payload.email || !payload.message) {
+      setSubmitState({
+        status: 'error',
+        message: 'Please fill in your name, email, and message.'
       });
+      return;
+    }
 
-      const contentType = response.headers.get('content-type') || '';
-      const isJson = contentType.includes('application/json');
-      const result = isJson
-        ? await response.json()
-        : {
-            ok: false,
-            error:
-              'Contact service is unavailable. Please restart the dev server and try again.'
-          };
-
-      if (!response.ok || !result.ok) {
-        throw new Error(result.error || 'Unable to send your message right now.');
+    try {
+      if (import.meta.env.PROD) {
+        await submitWithNetlifyForm(payload);
+      } else {
+        await submitWithApi(payload);
       }
 
       setForm({ name: '', email: '', message: '' });
       setSubmitState({ status: 'success', message: 'Message sent. I will reply by email soon.' });
     } catch (error) {
+      const isTimeoutError = error?.name === 'AbortError';
       setSubmitState({
         status: 'error',
-        message: error.message || 'Failed to send message. Please try again later.'
+        message: isTimeoutError
+          ? 'Sending took too long. Please try again in a moment.'
+          : error.message || 'Failed to send message. Please try again later.'
       });
     }
   };
@@ -216,7 +292,17 @@ function App() {
       <section id="contact" className="section card fade-up delay-5">
         <h2>Contact</h2>
         <p>Open to graduate roles, freelance projects, and collaborative product builds.</p>
-        <form className="contact-form" onSubmit={onSubmit}>
+        <form
+          className="contact-form"
+          name={CONTACT_FORM_NAME}
+          method="POST"
+          data-netlify="true"
+          data-netlify-honeypot="bot-field"
+          onSubmit={onSubmit}
+        >
+          <input type="hidden" name="form-name" value={CONTACT_FORM_NAME} />
+          <input type="hidden" name="bot-field" />
+
           <label htmlFor="name">Name</label>
           <input id="name" name="name" type="text" value={form.name} onChange={onChange} required />
 

@@ -1,6 +1,6 @@
 # React Portfolio
 
-A starter portfolio built with React, Vite, Node.js, HTML, and CSS.
+A portfolio built with React, Vite, Node.js, HTML, and CSS.
 
 ## Structure
 
@@ -21,17 +21,31 @@ A starter portfolio built with React, Vite, Node.js, HTML, and CSS.
 3. `cd server && npm install`
 4. `npm run dev`
 
-## Contact Form Email Delivery
+## Contact Form Behavior
 
-The contact form now sends messages through the backend API to your email inbox.
+- In local development, the form posts to `/api/contact` on the Node server.
+- In production, the form posts to Netlify Forms for fast delivery without a custom backend.
+
+### Local Email Setup (Development)
 
 1. Copy `server/.env.example` to `server/.env`.
-2. Keep `SMTP_USER` and `CONTACT_RECEIVER_EMAIL` as `princembowana013@gmail.com`.
-3. Generate a Gmail App Password and paste it into `SMTP_PASS`.
-4. In `server/`, run `npm install` to install email dependencies.
-5. Restart `npm run dev`.
+2. Set `SMTP_USER`, `SMTP_PASS`, and `CONTACT_RECEIVER_EMAIL`.
+3. In `server/`, run `npm install`.
+4. Run `npm run dev` from the project root.
 
-When someone submits the form, you will receive the message in your email and can reply directly to the sender.
+### Netlify Setup (Production)
+
+1. Push this repository to GitHub.
+2. In Netlify, create a new site from the repository.
+3. Build settings are preconfigured by `netlify.toml`:
+	- Build command: `npm run build --prefix client`
+	- Publish directory: `client/dist`
+4. Deploy the site.
+5. Open Netlify dashboard > Forms to confirm the form `portfolio-contact` is detected.
+6. Add email notifications in Netlify dashboard:
+	- Site settings > Forms > Form notifications > Add notification > Email.
+
+When a user clicks Send Message on the deployed site, submission goes to Netlify Forms and you receive notifications using your configured Netlify form notification channels.
 
 ## Notes
 

@@ -1,7 +1,26 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import profilePhoto from './img_8594.jpg';
 
 const projects = [
+  {
+    title: 'CodeDojo Arcade',
+    type: 'Gamified AI-Assisted Learning Platform',
+    challenge: 'First-year students can get stuck learning programming without someone available to help right away.',
+    solution: 'Created a platform for step-by-step Python and Java learning, automatic code grading, and Sensei AI hints that guide students without giving away solutions. Students can also turn PDF notes into summaries, flashcards, and quizzes, while lecturers track class progress, identify difficult lessons, export reports, and send announcements.',
+    impact: 'Combines coding practice, personalized study tools, and gamified progress with lecturer insights, reducing the need to mark coding tasks manually.',
+    stack: ['Python', 'Java', 'AI-assisted learning', 'Gamification'],
+    link: 'https://ai-learning-assistant-two-gamma.vercel.app/login',
+    linkText: 'Visit live app'
+  },
+  {
+    title: 'NEXORA — Next-Generation Intelligent Home Automation',
+    type: 'Real-Time Smart Home System',
+    challenge: 'Homeowners need a smarter way to monitor and control connected devices, sensors, and home automation.',
+    solution: 'Developed a FastAPI backend with environment-based configuration, health checks, real-time WebSockets, and PostgreSQL persistence using SQLAlchemy and Alembic. Optional MQTT integration supports physical-device commands, state, sensor readings, and availability. API-managed simulated lights, fans, and curtains persist state and broadcast updates; the project also includes a web dashboard, an Android-first Expo app, and NORA, an AI assistant.',
+    impact: 'Brings device control, monitoring, automation, and AI assistance together. Physical ESP32 hardware is not included or tested.',
+    stack: ['FastAPI', 'PostgreSQL', 'SQLAlchemy', 'Alembic', 'WebSockets', 'MQTT', 'Expo'],
+    link: 'https://github.com/MethodPrince/NEXORA-Real-Time-Intelligent-Smart-Home-System.git'
+  },
   {
     title: 'UMP Campus Navigation System',
     type: 'React Native / MongoDB',
@@ -129,6 +148,21 @@ const submitWithApi = async (form) => {
 function App() {
   const [form, setForm] = useState({ name: '', email: '', message: '' });
   const [submitState, setSubmitState] = useState({ status: 'idle', message: '' });
+  const [selectedProject, setSelectedProject] = useState(null);
+  const projectDialogRef = useRef(null);
+
+  useEffect(() => {
+    const dialog = projectDialogRef.current;
+    if (!dialog) {
+      return;
+    }
+
+    if (selectedProject && !dialog.open) {
+      dialog.showModal();
+    } else if (!selectedProject && dialog.open) {
+      dialog.close();
+    }
+  }, [selectedProject]);
 
   const onChange = (event) => {
     const { name, value } = event.target;
@@ -186,6 +220,9 @@ function App() {
           <div className="hero-actions">
             <a className="primary-button" href="#projects">View Projects</a>
             <a className="ghost-button" href="#contact">Hire Me</a>
+            <a className="ghost-button" href="/Method-Prince-Mbowana-CV.pdf" download>
+              Download CV
+            </a>
           </div>
           <div className="social-links">
             <a href="https://github.com/MethodPrince" target="_blank" rel="noreferrer">GitHub</a>
@@ -207,8 +244,8 @@ function App() {
               <p className="metric-label">Certifications</p>
             </div>
             <div>
-              <p className="metric-value">2025</p>
-              <p className="metric-label">Diploma Graduate</p>
+              <p className="metric-value">NQF 7</p>
+              <p className="metric-label">Advanced Diploma</p>
             </div>
           </div>
         </div>
@@ -257,26 +294,71 @@ function App() {
             <article key={project.title} className="project-card">
               <p className="project-tag">{project.type}</p>
               <h3>{project.title}</h3>
-              <p><strong>Challenge:</strong> {project.challenge}</p>
-              <p><strong>Solution:</strong> {project.solution}</p>
-              <p><strong>Impact:</strong> {project.impact}</p>
+              <p className="project-summary">{project.challenge}</p>
               <div className="chip-row">
-                {project.stack.map((item) => (
+                {project.stack.slice(0, 4).map((item) => (
                   <span key={item} className="chip">{item}</span>
                 ))}
               </div>
-              <a href={project.link} target="_blank" rel="noreferrer">View repository</a>
+              <div className="project-card-actions">
+                <button type="button" className="project-more-button" onClick={() => setSelectedProject(project)}>
+                  More details
+                </button>
+                <a href={project.link} target="_blank" rel="noreferrer">
+                  {project.linkText || 'View repository'}
+                </a>
+              </div>
             </article>
           ))}
         </div>
       </section>
+
+      <dialog
+        ref={projectDialogRef}
+        className="project-dialog"
+        aria-labelledby="project-dialog-title"
+        onClose={() => setSelectedProject(null)}
+      >
+        {selectedProject ? (
+          <div className="project-dialog-content">
+            <button
+              type="button"
+              className="project-dialog-close"
+              onClick={() => projectDialogRef.current?.close()}
+              aria-label="Close project details"
+            >
+              Close
+            </button>
+            <p className="project-tag">{selectedProject.type}</p>
+            <h2 id="project-dialog-title">{selectedProject.title}</h2>
+            <p><strong>Challenge:</strong> {selectedProject.challenge}</p>
+            <p><strong>Solution:</strong> {selectedProject.solution}</p>
+            <p><strong>Impact:</strong> {selectedProject.impact}</p>
+            <div className="chip-row">
+              {selectedProject.stack.map((item) => (
+                <span key={item} className="chip">{item}</span>
+              ))}
+            </div>
+            <a href={selectedProject.link} target="_blank" rel="noreferrer">
+              {selectedProject.linkText || 'View repository'}
+            </a>
+          </div>
+        ) : null}
+      </dialog>
 
       <section id="credentials" className="section card fade-up delay-4">
         <h2>Education & Credentials</h2>
         <div className="education-card">
           <div>
             <h3>University of Mpumalanga</h3>
-            <p>Diploma in ICT in Application Development</p>
+            <p>Advanced Diploma in ICT in Application Development (NQF Level 7)</p>
+          </div>
+          <span>Completed</span>
+        </div>
+        <div className="education-card">
+          <div>
+            <h3>University of Mpumalanga</h3>
+            <p>Diploma in ICT in Application Development (NQF Level 6)</p>
           </div>
           <span>Completed</span>
         </div>
@@ -292,6 +374,11 @@ function App() {
       <section id="contact" className="section card fade-up delay-5">
         <h2>Contact</h2>
         <p>Open to graduate roles, freelance projects, and collaborative product builds.</p>
+        <div className="contact-details">
+          <p><strong>Phone:</strong> <a href="tel:+27726173997">072 617 3997</a></p>
+          <p><strong>Email:</strong> <a href="mailto:princembowana013@gmail.com">princembowana013@gmail.com</a></p>
+          <p><strong>Relocation:</strong> Willing to relocate</p>
+        </div>
         <form
           className="contact-form"
           name={CONTACT_FORM_NAME}
